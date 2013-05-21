@@ -22,6 +22,7 @@ module Jimson
     end
 
     def process_call(sym, args)
+      args = args[0] if args.size == 1 and args[0].is_a?(Hash)
       resp = send_single_request(sym.to_s, args)
 
       begin
@@ -138,6 +139,7 @@ module Jimson
     end
 
     def method_missing(sym, *args, &block)
+      args = args[0] if args.size == 1 and args[0].is_a?(Hash)
       request = Jimson::Request.new(sym.to_s, args)
       @helper.push_batch_request(request) 
     end

@@ -130,6 +130,22 @@ module Jimson
           client.foo([1,2],3).should == 42
         end
       end
+      
+      context "when using named parameters" do
+        it "sends params as a hash" do
+          expected = MultiJson.encode({
+            'jsonrpc' => '2.0',
+            'method'  => 'foo',
+            'params'  => {"foo" => "bar", "baz" => "bang"},
+            'id'      => 1
+          })
+          response = MultiJson.encode(BOILERPLATE.merge({'result' => 42}))
+          RestClient.should_receive(:post).with(SPEC_URL, expected, {:content_type => 'application/json'}).and_return(@resp_mock)
+          @resp_mock.should_receive(:body).at_least(:once).and_return(response)
+          client = Client.new(SPEC_URL)
+          client.foo('foo' => 'bar', 'baz' => 'bang').should == 42
+        end
+      end
     end
 
     describe "sending a batch request" do
@@ -137,7 +153,7 @@ module Jimson
         batch = MultiJson.encode([
           {"jsonrpc" => "2.0", "method" => "sum", "params" => [1,2,4], "id" => "1"},
           {"jsonrpc" => "2.0", "method" => "subtract", "params" => [42,23], "id" => "2"},
-          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => [{"name" => "myself"}], "id" => "5"},
+          {"jsonrpc" => "2.0", "method" => "foo_get", "params" => {"name" => "myself"}, "id" => "5"},
           {"jsonrpc" => "2.0", "method" => "get_data", "id" => "9"} 
         ])
 
